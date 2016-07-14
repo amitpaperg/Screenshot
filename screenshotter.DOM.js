@@ -63,11 +63,13 @@
         window.document.body.scrollTop = 0;
         setTimeout(function() { screenshotVisibleArea(shared); }, 100);
       } else {
-        // TODO - show error message
+        // TODO - show a better error message
+        alert("A visisble Ad was not found. Go to all sizes view and make sure list view is ON");
       }
       
     } else {
-      // TODO - show error message
+      // TODO - show better error message
+      alert("A visisble Ad was not found. Go to all sizes view and make sure list view is ON");
     }
     
   }
