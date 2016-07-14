@@ -26,7 +26,7 @@
     "scripts": ["screenshotter.js", "actions.js"]
   },
   "content_scripts": [ 
-    { "js": [ "screenshotter.DOM.js", "blanketStyleSet.js" ], "matches": [ "<all_urls>" ], "run_at": "document_end" }
+    { "js": [ "screenshotter.DOM.js", "blanketStyleSet.js", "resources/jquery-1.4.2.min.js"], "matches": [ "<all_urls>" ], "run_at": "document_end" }
   ],
   "permissions": [
     "tabs",

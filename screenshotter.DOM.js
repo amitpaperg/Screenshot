@@ -39,10 +39,20 @@
   
   // 1
   function screenshotBegin(shared) {
-    shared.originalScrollTop = window.document.body.scrollTop; // ->[] save user scrollTop
-    shared.tab.hasVscrollbar = (window.innerHeight < window.document.body.scrollHeight);
-    window.document.body.scrollTop = 0;
-    setTimeout(function() { screenshotVisibleArea(shared); }, 100);
+    var curAd = $(".edit-launch-container");
+    if (curAd[0]) {
+      shared.adLeft = curAd.offset().left;
+      shared.adTop = curAd.offset().top;
+      shared.adInnerHeight = curAd.innerHeight(); 
+      shared.adInnerWidth = curAd.innerWidth();
+      shared.originalScrollTop = window.document.body.scrollTop; // ->[] save user scrollTop
+      shared.tab.hasVscrollbar = (window.innerHeight < window.document.body.scrollHeight);
+      window.document.body.scrollTop = 0;
+      setTimeout(function() { screenshotVisibleArea(shared); }, 100);
+    } else {
+      // TODO - show error message
+    }
+    
   }
   
   // 2

@@ -41,6 +41,11 @@ var Screenshotter = {
     imageDataURL: 0,
     
     originalScrollTop: 0,
+
+    adLeft: 0,
+    adTop: 0,
+    adInnerHeight: 0,
+    adInnerWidth: 0,   
     
     tab: {
       id: 0,
@@ -120,7 +125,7 @@ var Screenshotter = {
     var self = this;
     UI.status('azure', "make");
     
-    this.recursiveImageMerge(this.imageDataURLPartial, shared.imageDirtyCutAt, shared.tab.hasVscrollbar, function(image) {
+    this.recursiveImageMerge(this.imageDataURLPartial, shared.imageDirtyCutAt, shared.tab.hasVscrollbar, shared, function(image) {
       shared.imageDataURL = image;
       self.screenshotReturn(shared);
     });
@@ -150,7 +155,7 @@ var Screenshotter = {
   },
   
   // ****************************************************************************************** SUPPORT
-  recursiveImageMerge: function(imageDataURLs, imageDirtyCutAt, hasVscrollbar, callback, images, i) {
+  recursiveImageMerge: function(imageDataURLs, imageDirtyCutAt, hasVscrollbar, shared, callback, images, i) {
     /****************************************************************************************************
      * This function merges together all the pieces gathered during the scroll, recursively.
      * Returns a single data:// URL object from canvas.toDataURL("image/png") to the callback.
