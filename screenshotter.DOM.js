@@ -40,15 +40,32 @@
   // 1
   function screenshotBegin(shared) {
     var curAd = $(".edit-launch-container");
+    var foundVisisbleAd = false;
     if (curAd[0]) {
-      shared.adLeft = curAd.offset().left;
-      shared.adTop = curAd.offset().top;
-      shared.adInnerHeight = curAd.innerHeight(); 
-      shared.adInnerWidth = curAd.innerWidth();
-      shared.originalScrollTop = window.document.body.scrollTop; // ->[] save user scrollTop
-      shared.tab.hasVscrollbar = (window.innerHeight < window.document.body.scrollHeight);
-      window.document.body.scrollTop = 0;
-      setTimeout(function() { screenshotVisibleArea(shared); }, 100);
+      // find the ad that is visible
+      curAd.each(function(i){
+        console.log(i+": left:"+$(this).offset().left+" top: "+$(this).offset().top);
+        // find the first visible ad
+        if ($(this).offset().left>1 && $(this).offset().top> 1) {
+          // save co-ordinates of visible ad
+          shared.adLeft = $(this).offset().left;
+          shared.adTop = $(this).offset().top;
+          shared.adInnerHeight = $(this).innerHeight(); 
+          shared.adInnerWidth = $(this).innerWidth();
+          foundVisisbleAd = true;
+          return false; // break loop
+        }
+      });
+      
+      if (foundVisisbleAd) {
+        shared.originalScrollTop = window.document.body.scrollTop; // ->[] save user scrollTop
+        shared.tab.hasVscrollbar = (window.innerHeight < window.document.body.scrollHeight);
+        window.document.body.scrollTop = 0;
+        setTimeout(function() { screenshotVisibleArea(shared); }, 100);
+      } else {
+        // TODO - show error message
+      }
+      
     } else {
       // TODO - show error message
     }

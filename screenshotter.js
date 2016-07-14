@@ -103,7 +103,7 @@ var Screenshotter = {
   // 2
   screenshotVisibleArea: function(shared) {
     var self = this;
-    chrome.tabs.captureVisibleTab(null, { format: "png" /* png, jpeg */, quality: 80 }, function(dataUrl) {
+    chrome.tabs.captureVisibleTab(null, { format: "png" /* png, jpeg */, quality: 100 }, function(dataUrl) {
       if (dataUrl) {
         // Grab successful
         self.imageDataURLPartial.push(dataUrl);
@@ -160,7 +160,7 @@ var Screenshotter = {
      * This function merges together all the pieces gathered during the scroll, recursively.
      * Returns a single data:// URL object from canvas.toDataURL("image/png") to the callback.
      */
-    var fx = arguments.callee;
+
     i = i || 0;
     images = images || [];
     
@@ -189,11 +189,17 @@ var Screenshotter = {
             
             canvas.getContext("2d").drawImage(images[j], 0, cut, width, height, 0, j * images[0].height, width, height);
           }
-          
-          callback(canvas.toDataURL("image/png")); // --> CALLBACK (note that the file type is used also in the drag function)
+
+          // crop image to just the ad
+          var croppedCanvas = window.document.createElement('canvas');
+          croppedCanvas.width = shared.adInnerWidth;
+          croppedCanvas.height = shared.adInnerHeight;
+          croppedCanvas.getContext("2d").drawImage(canvas, shared.adLeft, shared.adTop, shared.adInnerWidth, shared.adInnerHeight, 0, 0, shared.adInnerWidth, shared.adInnerHeight);
+
+          callback(croppedCanvas.toDataURL("image/png")); // --> CALLBACK (note that the file type is used also in the drag function)
         } else {
           // ****** Down!
-          fx(imageDataURLs, imageDirtyCutAt, hasVscrollbar, callback, images, ++i);
+          recursiveImageMerge(imageDataURLs, imageDirtyCutAt, hasVscrollbar, shared, callback, images, ++i);
         }
       }
       images[i].src = imageDataURLs[i]; // Load!
