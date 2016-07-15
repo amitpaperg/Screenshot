@@ -39,17 +39,20 @@
   
   // 1
   function screenshotBegin(shared) {
-    var curAd = $(".edit-launch-container");
+    $(document.body).append('<div id="ad-capture-wrapper" style="position: absolute; height: ' + window.document.body.scrollHeight + 'px; width: 100%; top: 0px; left: 0px; background: #fff; z-index: 566666;"><div id="ad-capture-container" style="margin-top:50px; margin-left:10px"></div></div>');
+
+    var curAds = $(".creative-ad");
     var foundVisisbleAd = false;
-    if (curAd[0]) {
+    if (curAds[0]) {
       // find the ad that is visible
-      curAd.each(function(i){
+      curAds.each(function(i){
         console.log("Finding Ads- index:"+i+", left:"+$(this).offset().left+", top: "+$(this).offset().top);
+        $("#ad-capture-container").html($(this).html());
         // find the first visible ad
         if ($(this).offset().left>1 && $(this).offset().top> 1) {
           // save co-ordinates of visible ad
-          shared.adLeft = $(this).offset().left;
-          shared.adTop = $(this).offset().top;
+          shared.adLeft = $("#ad-capture-container").offset().left;
+          shared.adTop = $("#ad-capture-container").offset().top;
           shared.adInnerHeight = $(this).innerHeight(); 
           shared.adInnerWidth = $(this).innerWidth();
           foundVisisbleAd = true;
