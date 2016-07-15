@@ -58,9 +58,6 @@
       });
       
       if (foundVisisbleAd) {
-        shared.originalScrollTop = window.document.body.scrollTop; // ->[] save user scrollTop
-        shared.tab.hasVscrollbar = (window.innerHeight < window.document.body.scrollHeight);
-        window.document.body.scrollTop = 0;
         console.log("Starting Screen Capture in background");
         setTimeout(function() { screenshotVisibleArea(shared); }, 100);
       } else {
@@ -78,10 +75,6 @@
   // 2
   function screenshotVisibleArea(shared) {
     chrome.extension.sendMessage({ action: 'screenshotVisibleArea', shared: shared });
-
-    // remove code
-    var scrollTopCurrent = window.document.body.scrollTop; 
-    shared.imageDirtyCutAt = scrollTopCurrent % window.document.documentElement.clientHeight;
   }
  
   // 5
@@ -153,7 +146,7 @@
 
     // Create blob with mime type, create URL for it
     var blob = new Blob([view], {'type': parts[1]});
-    var URL = webkitURL.createObjectURL(blob)
+    var URL = webkitURL.createObjectURL(blob);
     
     return URL;
   }

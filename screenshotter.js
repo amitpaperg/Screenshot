@@ -33,15 +33,7 @@
 
 var Screenshotter = {
   
-  imageDataURL: [],
-  
   shared: {
-    imageDataURLPartial: [],
-    imageDirtyCutAt: 0,
-    imageDataURL: 0,
-    
-    originalScrollTop: 0,
-
     adLeft: 0,
     adTop: 0,
     adInnerHeight: 0,
