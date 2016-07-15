@@ -77,6 +77,8 @@ var Screenshotter = {
     
     // ****** Reset screenshot container
     this.imageDataURLPartial = [];
+
+    console.log("Begining Screenshot capture - BG Task");
     
     // ****** Get tab data
     chrome.windows.getCurrent(function(win) {
@@ -103,34 +105,32 @@ var Screenshotter = {
   // 2
   screenshotVisibleArea: function(shared) {
     var self = this;
+    console.log("called screenshot visisble area");
     chrome.tabs.captureVisibleTab(null, { format: "png" /* png, jpeg */, quality: 100 }, function(dataUrl) {
       if (dataUrl) {
         // Grab successful
-        self.imageDataURLPartial.push(dataUrl);
-        self.screenshotScroll(shared);
+        var canvas = window.document.createElement('canvas');
+        canvas.width = shared.adInnerWidth;
+        canvas.height = shared.adInnerHeight;
+
+        var adImage = new Image();
+        adImage.src = dataUrl;
+        canvas.getContext("2d").drawImage(adImage, shared.adLeft, shared.adTop, shared.adInnerWidth, shared.adInnerHeight, 0, 0, shared.adInnerWidth, shared.adInnerHeight);
+        shared.imageDataURL = canvas.toDataURL("image/png");
+        self.screenshotReturn(shared);
+
+        UI.status('azure', "make");
+        console.log("captured visisble tab");
+       
       } else {
         // Grab failed, warning
         // To handle issues like permissions - https://github.com/folletto/Blipshot/issues/9
-        alert("\n\n\nI'm sorry.\n\nIt seems Blipshot wasn't able to grab the screenshot of the active tab.\n\nPlease check the extension permissions.\n\nIf the problem persists contact me at \nhttp://github.com/folletto/Blipshot/issues\n\n\n");
+        alert("\n\n\nI'm sorry.\n\nIt seems Thunder Ad Capture wasn't able to grab the screenshot of the active tab.\n\nPlease check the extension permissions.\n\nIf the problem persists contact me at \nhttp://github.com/folletto/Blipshot/issues\n\n\n");
         return false;
       }
     });
   },
-  
-  // 3
-  screenshotScroll: function(shared) { chrome.tabs.sendMessage(this.shared.tab.id, { action: 'screenshotScroll', shared: shared }); },
-  
-  // 4
-  screenshotEnd: function(shared) {
-    var self = this;
-    UI.status('azure', "make");
-    
-    this.recursiveImageMerge(this.imageDataURLPartial, shared.imageDirtyCutAt, shared.tab.hasVscrollbar, shared, function(image) {
-      shared.imageDataURL = image;
-      self.screenshotReturn(shared);
-    });
-  },
-  
+
   // 5
   screenshotReturn: function(shared) {
     UI.status('green', "done", 3000);
@@ -152,58 +152,6 @@ var Screenshotter = {
           case "screenshotEnd": self.screenshotEnd(e.shared); break;
         }
     });
-  },
-  
-  // ****************************************************************************************** SUPPORT
-  recursiveImageMerge: function(imageDataURLs, imageDirtyCutAt, hasVscrollbar, shared, callback, images, i) {
-    /****************************************************************************************************
-     * This function merges together all the pieces gathered during the scroll, recursively.
-     * Returns a single data:// URL object from canvas.toDataURL("image/png") to the callback.
-     */
-
-    i = i || 0;
-    images = images || [];
-    
-    if (i < imageDataURLs.length) {
-      images[i] = new Image();
-      images[i].onload = function() {
-        imageDataURLs[i] = null; // clear for optimize memory consumption (not sure)
-        if (i == imageDataURLs.length - 1) {
-          // ****** We're at the end of the chain, let's have fun with canvas.
-          var canvas = window.document.createElement('canvas');
-          
-          // NOTE: Resizing a canvas is destructive, we can do it just now before stictching
-          canvas.width = images[0].width - (hasVscrollbar ? 15 : 0); // <-- manage V scrollbar
-          
-          if (images.length > 1) canvas.height = (imageDataURLs.length - 1) * images[0].height + imageDirtyCutAt;
-          else canvas.height = images[0].height;
-          
-          // ****** Stitch
-          for (var j = 0; j < images.length; j++) {
-            var cut = 0;
-            if (images.length > 1 && j == images.length - 1) cut = images[j].height - imageDirtyCutAt;
-            
-            var height = images[j].height - cut;
-            var width = images[j].width;
-            //alert("[i:" + i + ", j:" + j + "]" + width + "x" + height + "(cut:" + cut + ") --- images:" + imageDataURLs.length);
-            
-            canvas.getContext("2d").drawImage(images[j], 0, cut, width, height, 0, j * images[0].height, width, height);
-          }
-
-          // crop image to just the ad
-          var croppedCanvas = window.document.createElement('canvas');
-          croppedCanvas.width = shared.adInnerWidth;
-          croppedCanvas.height = shared.adInnerHeight;
-          croppedCanvas.getContext("2d").drawImage(canvas, shared.adLeft, shared.adTop, shared.adInnerWidth, shared.adInnerHeight, 0, 0, shared.adInnerWidth, shared.adInnerHeight);
-
-          callback(croppedCanvas.toDataURL("image/png")); // --> CALLBACK (note that the file type is used also in the drag function)
-        } else {
-          // ****** Down!
-          recursiveImageMerge(imageDataURLs, imageDirtyCutAt, hasVscrollbar, shared, callback, images, ++i);
-        }
-      }
-      images[i].src = imageDataURLs[i]; // Load!
-    }
   }
 }
 

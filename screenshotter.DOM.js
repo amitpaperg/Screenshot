@@ -44,7 +44,7 @@
     if (curAd[0]) {
       // find the ad that is visible
       curAd.each(function(i){
-        console.log(i+": left:"+$(this).offset().left+" top: "+$(this).offset().top);
+        console.log("Finding Ads- index:"+i+", left:"+$(this).offset().left+", top: "+$(this).offset().top);
         // find the first visible ad
         if ($(this).offset().left>1 && $(this).offset().top> 1) {
           // save co-ordinates of visible ad
@@ -61,6 +61,7 @@
         shared.originalScrollTop = window.document.body.scrollTop; // ->[] save user scrollTop
         shared.tab.hasVscrollbar = (window.innerHeight < window.document.body.scrollHeight);
         window.document.body.scrollTop = 0;
+        console.log("Starting Screen Capture in background");
         setTimeout(function() { screenshotVisibleArea(shared); }, 100);
       } else {
         // TODO - show a better error message
@@ -75,29 +76,14 @@
   }
   
   // 2
-  function screenshotVisibleArea(shared) { chrome.extension.sendMessage({ action: 'screenshotVisibleArea', shared: shared }); }
-  
-  // 3
-  function screenshotScroll(shared) {
-    var scrollTopCurrent = window.document.body.scrollTop;
-    
-    //TODO: bug: doesn't screenshot correctly
-    window.document.body.scrollTop += window.innerHeight; // scroll!
-    
-    if (window.document.body.scrollTop == scrollTopCurrent) {
-      // END ||
-      shared.imageDirtyCutAt = scrollTopCurrent % window.document.documentElement.clientHeight;
-      window.document.body.scrollTop = shared.originalScrollTop; // <-[] restore user scrollTop
-      screenshotEnd(shared);
-    } else {
-      // LOOP >>
-      setTimeout(function() { screenshotVisibleArea(shared); }, 100);
-    }
+  function screenshotVisibleArea(shared) {
+    chrome.extension.sendMessage({ action: 'screenshotVisibleArea', shared: shared });
+
+    // remove code
+    var scrollTopCurrent = window.document.body.scrollTop; 
+    shared.imageDirtyCutAt = scrollTopCurrent % window.document.documentElement.clientHeight;
   }
-  
-  // 4
-  function screenshotEnd(shared) { chrome.extension.sendMessage({ action: 'screenshotEnd', shared: shared }); }
-  
+ 
   // 5
   function screenshotReturn(shared) {
     function pad2(str) { if ((str + "").length == 1) return "0" + str; return "" + str; }
@@ -140,7 +126,6 @@
     chrome.extension.onMessage.addListener(function(e) {
         switch (e.action) {
           case "screenshotBegin": screenshotBegin(e.shared); break;
-          case "screenshotScroll": screenshotScroll(e.shared); break;
           case "screenshotReturn": screenshotReturn(e.shared); break;
         }
     });

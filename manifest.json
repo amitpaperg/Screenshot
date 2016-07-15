@@ -3,7 +3,7 @@
 
 
   "name": "Thunder Ad Capture — one click images",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Real fast and simple one-click Thunder Ad Frame screenshots with drag and drop.",
   "author": "Amit Velingkar (Open Source - Davide Casali)",
 
@@ -26,7 +26,7 @@
     "scripts": ["screenshotter.js", "actions.js"]
   },
   "content_scripts": [ 
-    { "js": [ "screenshotter.DOM.js", "blanketStyleSet.js", "resources/jquery-1.4.2.min.js"], "matches": [ "<all_urls>" ], "run_at": "document_end" }
+    { "js": [ "screenshotter.DOM.js", "blanketStyleSet.js", "resources/jquery-1.4.2.min.js", "resources/jszip.min.js"], "matches": [ "<all_urls>" ], "run_at": "document_end" }
   ],
   "permissions": [
     "tabs",
