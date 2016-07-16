@@ -39,7 +39,7 @@
   var curAds;
   
   // ****************************************************************************************** SCREENSHOT SEQUENCE
-  function screenshotPrep(shared) {
+  function screenshotBegin(shared) {
     // do we have any ads on the page?
     curAds = $(".creative-ad");
     totalAds = 0;
@@ -51,13 +51,16 @@
 
       // add a capture div wrapper
       $(document.body).append('<div id="ad-capture-wrapper" style="position: absolute; height: ' + window.document.body.scrollHeight + 'px; width: 100%; top: 0px; left: 0px; background: #fff; z-index: 566666;"><div id="ad-capture-container" style="margin-top:50px; margin-left:10px"></div></div>');
+
+      // start screenshot of ads
+      screenshotNextAd(shared);
     } else {
       alert("A visisble Ad was not found. Go to All Sizes View and make sure list view is ON");
     }
   }
 
   // 1
-  function screenshotBegin(shared) {
+  function screenshotNextAd(shared) {
     console.log("Begin Screenshotting Ads- index:"+curAdIndex);
 
     // display the ad to capture
@@ -142,8 +145,8 @@
     var self = this;
     chrome.extension.onMessage.addListener(function(e) {
         switch (e.action) {
-          case "screenshotPrep": screenshotPrep(e.shared); break;
           case "screenshotBegin": screenshotBegin(e.shared); break;
+          case "screenshotNextAd": screenshotNextAd(e.shared); break;
           case "screenshotReturn": screenshotReturn(e.shared); break;
         }
     });

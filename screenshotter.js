@@ -90,16 +90,15 @@ var Screenshotter = {
         
         // ****** Begin!
         chrome.tabs.sendMessage(self.shared.tab.id, { action: 'blanketStyleSet', property: 'position', from: 'fixed', to: 'absolute' });
-        self.screenshotPrep(self.shared);
         self.screenshotBegin(self.shared);
       });
     });
   },
   // 1
-  screenshotPrep: function(shared) { chrome.tabs.sendMessage(this.shared.tab.id, { action: 'screenshotPrep', shared: shared }); },
+  screenshotBegin: function(shared) { chrome.tabs.sendMessage(this.shared.tab.id, { action: 'screenshotBegin', shared: shared }); },
   
   // 1
-  screenshotBegin: function(shared) { chrome.tabs.sendMessage(this.shared.tab.id, { action: 'screenshotBegin', shared: shared }); },
+  screenshotNextAd: function(shared) { chrome.tabs.sendMessage(this.shared.tab.id, { action: 'screenshotNextAd', shared: shared }); },
   
   // 2
   screenshotVisibleArea: function(shared) {
@@ -121,13 +120,10 @@ var Screenshotter = {
           self.screenshotReturn(shared);
         } else {
           // capture next screenshot
-          self.screenshotBegin(shared);
+          self.screenshotNextAd(shared);
         }
-        
-
         UI.status('azure', "make");
         console.log("captured visisble tab");
-       
       } else {
         // Grab failed, warning
        alert("\n\n\nI'm sorry.\n\nIt seems Thunder Ad Capture wasn't able to grab the screenshot of the active tab.\n\nPlease check the extension permissions.\n\n");
