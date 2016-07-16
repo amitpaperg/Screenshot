@@ -1,0 +1,13 @@
+.ad-capture-btn {
+    background: blue;
+    padding: 10px;
+    text-decoration: none;
+    margin-top: 10px;
+    display: inline-block;
+    border: 1px solid #999;
+    border-radius: 3px;
+}
+
+.ad-capture-btn a {
+    color: #eee;
+}
