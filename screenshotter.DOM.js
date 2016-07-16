@@ -34,45 +34,47 @@
 (function() {
   
   var shared = {};
+  var totalAds = 0;
+  var curAdIndex = 0;
+  var curAds;
   
   // ****************************************************************************************** SCREENSHOT SEQUENCE
-  
+  function screenshotPrep(shared) {
+    // do we have any ads on the page?
+    curAds = $(".creative-ad");
+    totalAds = 0;
+    if (curAds[0]) {
+      // reset globals
+      totalAds = $(".creative-ad").length;
+      curAdIndex = 0;
+      shared.lastAdCapture = false;
+
+      // add a capture div wrapper
+      $(document.body).append('<div id="ad-capture-wrapper" style="position: absolute; height: ' + window.document.body.scrollHeight + 'px; width: 100%; top: 0px; left: 0px; background: #fff; z-index: 566666;"><div id="ad-capture-container" style="margin-top:50px; margin-left:10px"></div></div>');
+    } else {
+      alert("A visisble Ad was not found. Go to All Sizes View and make sure list view is ON");
+    }
+  }
+
   // 1
   function screenshotBegin(shared) {
-    $(document.body).append('<div id="ad-capture-wrapper" style="position: absolute; height: ' + window.document.body.scrollHeight + 'px; width: 100%; top: 0px; left: 0px; background: #fff; z-index: 566666;"><div id="ad-capture-container" style="margin-top:50px; margin-left:10px"></div></div>');
+    console.log("Begin Screenshotting Ads- index:"+curAdIndex);
 
-    var curAds = $(".creative-ad");
-    var foundVisisbleAd = false;
-    if (curAds[0]) {
-      // find the ad that is visible
-      curAds.each(function(i){
-        console.log("Finding Ads- index:"+i+", left:"+$(this).offset().left+", top: "+$(this).offset().top);
-        $("#ad-capture-container").html($(this).html());
-        // find the first visible ad
-        if ($(this).offset().left>1 && $(this).offset().top> 1) {
-          // save co-ordinates of visible ad
-          shared.adLeft = $("#ad-capture-container").offset().left;
-          shared.adTop = $("#ad-capture-container").offset().top;
-          shared.adInnerHeight = $(this).innerHeight(); 
-          shared.adInnerWidth = $(this).innerWidth();
-          foundVisisbleAd = true;
-          return false; // break loop
-        }
-      });
-      
-      if (foundVisisbleAd) {
-        console.log("Starting Screen Capture in background");
-        setTimeout(function() { screenshotVisibleArea(shared); }, 100);
-      } else {
-        // TODO - show a better error message
-        alert("A visisble Ad was not found. Go to all sizes view and make sure list view is ON");
-      }
-      
-    } else {
-      // TODO - show better error message
-      alert("A visisble Ad was not found. Go to all sizes view and make sure list view is ON");
-    }
-    
+    // display the ad to capture
+    $("#ad-capture-container").html($(curAds[curAdIndex]).html());
+        
+    // save co-ordinates of visible ad
+    shared.adLeft = $("#ad-capture-container").offset().left;
+    shared.adTop = $("#ad-capture-container").offset().top;
+    shared.adInnerHeight = $(curAds[curAdIndex]).innerHeight(); 
+    shared.adInnerWidth = $(curAds[curAdIndex]).innerWidth();
+
+    // increment index for next round
+    curAdIndex = curAdIndex+1;
+    shared.lastAdCapture = (curAdIndex >= totalAds);
+
+    // screenshot the ad
+    setTimeout(function() { screenshotVisibleArea(shared); }, 100);
   }
   
   // 2
@@ -83,19 +85,37 @@
   // 5
   function screenshotReturn(shared) {
     function pad2(str) { if ((str + "").length == 1) return "0" + str; return "" + str; }
+
+    var zip = new JSZip();
+    zip.file("Hello.txt", "Hello World\n");
+    //var content;
+    var filename;
+    for (var i=0; i<shared.imageDataURLs.length; i++) {
+      var d = new Date();
+      var timestamp = '' + d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDay()) + '-' + pad2(d.getHours()) + '' + pad2(d.getMinutes()) + '';
+      filename = "pageshot of '" + normalizeFileName(shared.tab.title) + "' @ " + timestamp;
+      var blob = dataURItoBlob(shared.imageDataURLs[i]);
+
+      zip.file("foo-"+i+'.png', blob, {base64: true});
+    }
+
+    // generate zip file
+    zip.generateAsync({type:"base64"})
+    .then(function(content) {
+        // see FileSaver.js
+        $("#ad-capture-container").append("<a href='data:application/zip;base64,"+content+"'>Download ZipFile</a>")
+    });
     
-    var d = new Date();
-    var timestamp = '' + d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDay()) + '-' + pad2(d.getHours()) + '' + pad2(d.getMinutes()) + '';
-    var filename = "pageshot of '" + normalizeFileName(shared.tab.title) + "' @ " + timestamp;
-    var blobURL = dataToBlobURL(shared.imageDataURL);
     
+    /*
     // ****** Add DOM Elements to Page
     var div = window.document.createElement('div');
     div.id = "blipshot";
     div.innerHTML = '<div id="blipshot-dim" style="position: absolute !important; height: ' + window.document.body.scrollHeight + 'px !important; width: 100% !important; top: 0px !important; left: 0px !important; background: #000000 !important; opacity: 0.66 !important; z-index: 666666 !important;"> </div>';
     div.innerHTML += '<p style="margin: 20px; position: absolute; top: 35px; right: 0; z-index: 666667 !important;"><img id="blipshot-img" alt="' + filename + '" src="' +  blobURL + '" max-width= "400" /></p>';
     window.document.body.appendChild(div);
-    
+    */
+    /*
     // ****** Add Event Listeners
     function actionRemoveDiv() {
       // Closes the extension overlays.
@@ -108,8 +128,9 @@
     function actionDrag(e) {
       e.dataTransfer.setData("DownloadURL", "image/png:" + filename + ".png:" + blobURL);
     }
-    window.document.getElementById('blipshot-dim').addEventListener("click", actionRemoveDiv);
-    window.document.getElementById('blipshot-img').addEventListener("dragstart", actionDrag);
+    */
+    //window.document.getElementById('blipshot-dim').addEventListener("click", actionRemoveDiv);
+    //window.document.getElementById('blipshot-img').addEventListener("dragstart", actionDrag);
   }
   
   // ****************************************************************************************** EVENT MANAGER / HALF
@@ -121,6 +142,7 @@
     var self = this;
     chrome.extension.onMessage.addListener(function(e) {
         switch (e.action) {
+          case "screenshotPrep": screenshotPrep(e.shared); break;
           case "screenshotBegin": screenshotBegin(e.shared); break;
           case "screenshotReturn": screenshotReturn(e.shared); break;
         }
@@ -153,6 +175,15 @@
     
     return URL;
   }
+
+  function dataURItoBlob(dataurl) {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type:mime});
+}
   
   function normalizeFileName(string) {
     out = string;

@@ -34,10 +34,14 @@
 var Screenshotter = {
   
   shared: {
+    imageDataURLs: [],
     adLeft: 0,
     adTop: 0,
     adInnerHeight: 0,
-    adInnerWidth: 0,   
+    adInnerWidth: 0,
+    adIndex: 0,
+    totalAds: 0,
+    lastAdCapture: false,
     
     tab: {
       id: 0,
@@ -68,7 +72,7 @@ var Screenshotter = {
     var self = this;
     
     // ****** Reset screenshot container
-    this.imageDataURLPartial = [];
+    //shared.imageDataURLs = [];
 
     console.log("Begining Screenshot capture - BG Task");
     
@@ -86,10 +90,13 @@ var Screenshotter = {
         
         // ****** Begin!
         chrome.tabs.sendMessage(self.shared.tab.id, { action: 'blanketStyleSet', property: 'position', from: 'fixed', to: 'absolute' });
+        self.screenshotPrep(self.shared);
         self.screenshotBegin(self.shared);
       });
     });
   },
+  // 1
+  screenshotPrep: function(shared) { chrome.tabs.sendMessage(this.shared.tab.id, { action: 'screenshotPrep', shared: shared }); },
   
   // 1
   screenshotBegin: function(shared) { chrome.tabs.sendMessage(this.shared.tab.id, { action: 'screenshotBegin', shared: shared }); },
@@ -108,16 +115,22 @@ var Screenshotter = {
         var adImage = new Image();
         adImage.src = dataUrl;
         canvas.getContext("2d").drawImage(adImage, shared.adLeft, shared.adTop, shared.adInnerWidth, shared.adInnerHeight, 0, 0, shared.adInnerWidth, shared.adInnerHeight);
-        shared.imageDataURL = canvas.toDataURL("image/png");
-        self.screenshotReturn(shared);
+        shared.imageDataURLs.push(canvas.toDataURL("image/png"));
+        if (shared.lastAdCapture) {
+          // only on last ad, create zip file
+          self.screenshotReturn(shared);
+        } else {
+          // capture next screenshot
+          self.screenshotBegin(shared);
+        }
+        
 
         UI.status('azure', "make");
         console.log("captured visisble tab");
        
       } else {
         // Grab failed, warning
-        // To handle issues like permissions - https://github.com/folletto/Blipshot/issues/9
-        alert("\n\n\nI'm sorry.\n\nIt seems Thunder Ad Capture wasn't able to grab the screenshot of the active tab.\n\nPlease check the extension permissions.\n\nIf the problem persists contact me at \nhttp://github.com/folletto/Blipshot/issues\n\n\n");
+       alert("\n\n\nI'm sorry.\n\nIt seems Thunder Ad Capture wasn't able to grab the screenshot of the active tab.\n\nPlease check the extension permissions.\n\n");
         return false;
       }
     });
