@@ -108,12 +108,14 @@ var Screenshotter = {
       if (dataUrl) {
         // Grab successful
         var canvas = window.document.createElement('canvas');
-        canvas.width = shared.adInnerWidth;
-        canvas.height = shared.adInnerHeight;
+        canvas.width = shared.adInnerWidth / window.devicePixelRatio;
+        canvas.height = shared.adInnerHeight / window.devicePixelRatio;
 
+        // capture ad and then scale for retina display
         var adImage = new Image();
         adImage.src = dataUrl;
-        canvas.getContext("2d").drawImage(adImage, shared.adLeft, shared.adTop, shared.adInnerWidth, shared.adInnerHeight, 0, 0, shared.adInnerWidth, shared.adInnerHeight);
+        canvas.getContext("2d").drawImage(adImage, shared.adLeft, shared.adTop, shared.adInnerWidth, shared.adInnerHeight, 0, 0, shared.adInnerWidth / window.devicePixelRatio, shared.adInnerHeight / window.devicePixelRatio);
+
         shared.imageDataURLs.push(canvas.toDataURL("image/png"));
         if (shared.lastAdCapture) {
           // only on last ad, create zip file

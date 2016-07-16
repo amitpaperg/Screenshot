@@ -67,17 +67,17 @@
     $("#ad-capture-container").html($(curAds[curAdIndex]).html());
         
     // save co-ordinates of visible ad
-    shared.adLeft = $("#ad-capture-container").offset().left;
-    shared.adTop = $("#ad-capture-container").offset().top;
-    shared.adInnerHeight = $(curAds[curAdIndex]).innerHeight(); 
-    shared.adInnerWidth = $(curAds[curAdIndex]).innerWidth();
+    shared.adLeft = $("#ad-capture-container").offset().left * window.devicePixelRatio;
+    shared.adTop = $("#ad-capture-container").offset().top * window.devicePixelRatio;
+    shared.adInnerHeight = $(curAds[curAdIndex]).innerHeight() * window.devicePixelRatio; 
+    shared.adInnerWidth = $(curAds[curAdIndex]).innerWidth() * window.devicePixelRatio;
 
     // increment index for next round
     curAdIndex = curAdIndex+1;
     shared.lastAdCapture = (curAdIndex >= totalAds);
 
     // screenshot the ad
-    setTimeout(function() { screenshotVisibleArea(shared); }, 100);
+    setTimeout(function() { screenshotVisibleArea(shared); }, 1000);
   }
   
   // 2
