@@ -1,5 +1,5 @@
 .ad-capture-btn {
-    background: blue;
+    background: #ccc;
     padding: 10px;
     text-decoration: none;
     margin-top: 10px;
@@ -10,4 +10,8 @@
 
 .ad-capture-btn a {
     color: #eee;
+}
+
+.btn-primary {
+    background: blue;
 }

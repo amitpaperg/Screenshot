@@ -46,6 +46,7 @@
     if (curAds[0]) {
       // reset globals
       totalAds = $(".creative-ad").length;
+      $("#ad-capture-wrapper").remove();
       curAdIndex = 0;
       shared.lastAdCapture = false;
 
@@ -114,9 +115,14 @@
         $("#ad-capture-header").html("Capture Screenshots of Ads - COMPLETE");
         // see FileSaver.js
         $("#ad-capture-container").html("\
-        <div class='ad-capture-btn'>\
+        <div class='ad-capture-btn btn-close'>Close</div>\
+        <div class='ad-capture-btn btn-primary'>\
           <a href='data:application/zip;base64,"+content+"'>Download ZipFile</a>\
         </div>");
+
+        $(".btn-close").click(function(){
+          $("#ad-capture-wrapper").remove();
+        });
     });
     
     /*
