@@ -48,15 +48,16 @@
       totalAds = $(".creative-ad").length;
       $("#ad-capture-wrapper").remove();
       curAdIndex = 0;
+      shared.imageDataURLs = [];
       shared.lastAdCapture = false;
 
       // add a capture div wrapper
       $(document.body).append('\
-      <div id="ad-capture-wrapper" style="position: absolute; height: ' + window.document.body.scrollHeight + 'px; width: 100%; top: 0px; left: 0px; background: #fff; z-index: 566666;">\
-        <div id="ad-capture-header" style="margin-top:50px; margin-left:10px">\
+      <div id="ad-capture-wrapper" style="height: ' + window.document.body.scrollHeight + 'px">\
+        <div id="ad-capture-header">\
             Capturing Screenshot of Ads - <span id="ad-capture-num">1</span> of '+totalAds+'.\
           </div>\
-        <div id="ad-capture-container" style="margin-top:10px; margin-left:10px"></div>\
+        <div id="ad-capture-container"></div>\
       </div>');
 
       // start screenshot of ads
@@ -74,8 +75,8 @@
     // save co-ordinates of visible ad
     shared.adLeft = $("#ad-capture-container").offset().left * window.devicePixelRatio;
     shared.adTop = $("#ad-capture-container").offset().top * window.devicePixelRatio;
-    shared.adInnerHeight = $(curAds[curAdIndex]).innerHeight() * window.devicePixelRatio; 
-    shared.adInnerWidth = $(curAds[curAdIndex]).innerWidth() * window.devicePixelRatio;
+    shared.adInnerHeight = $("#ad-capture-container").innerHeight() * window.devicePixelRatio; 
+    shared.adInnerWidth = $("#ad-capture-container").innerWidth() * window.devicePixelRatio;
 
     // increment index for next round
     curAdIndex = curAdIndex+1;
@@ -100,13 +101,17 @@
     //var content;
     var filename;
     for (var i=0; i<shared.imageDataURLs.length; i++) {
+      // $("#ad-capture-header").html("Generating Zip File - Image - "+i+" of "+totalAds);
       var d = new Date();
       var timestamp = '' + d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDay()) + '-' + pad2(d.getHours()) + '' + pad2(d.getMinutes()) + '';
       filename = "pageshot of '" + normalizeFileName(shared.tab.title) + "' @ " + timestamp;
       var blob = dataURItoBlob(shared.imageDataURLs[i]);
-
+      shared.imageDataURLs[i] = null;
       zip.file("foo-"+i+'.png', blob, {base64: true});
     }
+    
+    // free up image data urls
+    shared.imageDataURLs = [];
 
     // generate zip file
     zip.generateAsync({type:"base64"})
@@ -124,31 +129,6 @@
           $("#ad-capture-wrapper").remove();
         });
     });
-    
-    /*
-    // ****** Add DOM Elements to Page
-    var div = window.document.createElement('div');
-    div.id = "blipshot";
-    div.innerHTML = '<div id="blipshot-dim" style="position: absolute !important; height: ' + window.document.body.scrollHeight + 'px !important; width: 100% !important; top: 0px !important; left: 0px !important; background: #000000 !important; opacity: 0.66 !important; z-index: 666666 !important;"> </div>';
-    div.innerHTML += '<p style="margin: 20px; position: absolute; top: 35px; right: 0; z-index: 666667 !important;"><img id="blipshot-img" alt="' + filename + '" src="' +  blobURL + '" max-width= "400" /></p>';
-    window.document.body.appendChild(div);
-    */
-    /*
-    // ****** Add Event Listeners
-    function actionRemoveDiv() {
-      // Closes the extension overlays.
-      var blipshotdiv = window.document.getElementById('blipshot');
-      if (blipshotdiv) blipshotdiv.parentElement.removeChild(blipshotdiv);
-      
-      // Cleanup
-      window.webkitURL.revokeObjectURL(blobURL);
-    }
-    function actionDrag(e) {
-      e.dataTransfer.setData("DownloadURL", "image/png:" + filename + ".png:" + blobURL);
-    }
-    */
-    //window.document.getElementById('blipshot-dim').addEventListener("click", actionRemoveDiv);
-    //window.document.getElementById('blipshot-img').addEventListener("dragstart", actionDrag);
   }
   
   // ****************************************************************************************** EVENT MANAGER / HALF
@@ -168,32 +148,6 @@
   }
   eventManagerInit(); // Init
   
-  // ****************************************************************************************** SUPPORT
-  function dataToBlobURL(dataURL) {
-    /****************************************************************************************************
-     * Converts a data:// URL (i.e. `canvas.toDataURL("image/png")`) to a blob:// URL.
-     * This allows a shorter URL and a simple management of big data objects.
-     * 
-     * Contributor: Ben Ellis <https://github.com/ble>
-     */
-    var parts = dataURL.match(/data:([^;]*)(;base64)?,([0-9A-Za-z+/]+)/);
-    
-    // Assume base64 encoding
-    var binStr = atob(parts[3]);
-    
-    // Convert to binary in ArrayBuffer
-    var buf = new ArrayBuffer(binStr.length);
-    var view = new Uint8Array(buf);
-    for(var i = 0; i < view.length; i++)
-      view[i] = binStr.charCodeAt(i);
-
-    // Create blob with mime type, create URL for it
-    var blob = new Blob([view], {'type': parts[1]});
-    var URL = webkitURL.createObjectURL(blob);
-    
-    return URL;
-  }
-
   function dataURItoBlob(dataurl) {
     var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
         bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);

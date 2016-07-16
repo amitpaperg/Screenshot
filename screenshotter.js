@@ -64,7 +64,7 @@ var Screenshotter = {
      *      screenshotBegin (script)
      *      loop {
      *        screenshotVisibleArea (bg)
-     *        screenshotScroll (script)
+     *        screenshotNextAd (script)
      *      }
      *      screenshotEnd (bg)
      *      screenshotReturn (script)
