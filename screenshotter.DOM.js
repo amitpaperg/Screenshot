@@ -63,7 +63,7 @@
       // start screenshot of ads
       screenshotNextAd(shared);
     } else {
-      alert("A visisble Ad was not found. Go to All Sizes View and make sure list view is ON");
+      alert("I'm sorry. A visisble Ad was not found. Make sure you are on Thunder Creative Management Platform. Open the Ad Editor. Then, go to All Sizes View and make sure list view is ON");
     }
   }
 
@@ -97,17 +97,13 @@
     function pad2(str) { if ((str + "").length == 1) return "0" + str; return "" + str; }
 
     var zip = new JSZip();
-    zip.file("Hello.txt", "Hello World\n");
-    //var content;
+    var campaignName = $(".topbar-title").text();
     var filename;
     for (var i=0; i<shared.imageDataURLs.length; i++) {
-      // $("#ad-capture-header").html("Generating Zip File - Image - "+i+" of "+totalAds);
-      var d = new Date();
-      var timestamp = '' + d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDay()) + '-' + pad2(d.getHours()) + '' + pad2(d.getMinutes()) + '';
-      filename = "pageshot of '" + normalizeFileName(shared.tab.title) + "' @ " + timestamp;
       var blob = dataURItoBlob(shared.imageDataURLs[i]);
       shared.imageDataURLs[i] = null;
-      zip.file("foo-"+i+'.png', blob, {base64: true});
+      // TODO - list of ad sizes in file names
+      zip.file(campaignName+"-"+(i+1)+'.png', blob, {base64: true});
     }
     
     // free up image data urls
