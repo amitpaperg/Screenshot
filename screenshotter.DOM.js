@@ -50,7 +50,13 @@
       shared.lastAdCapture = false;
 
       // add a capture div wrapper
-      $(document.body).append('<div id="ad-capture-wrapper" style="position: absolute; height: ' + window.document.body.scrollHeight + 'px; width: 100%; top: 0px; left: 0px; background: #fff; z-index: 566666;"><div id="ad-capture-container" style="margin-top:50px; margin-left:10px"></div></div>');
+      $(document.body).append('\
+      <div id="ad-capture-wrapper" style="position: absolute; height: ' + window.document.body.scrollHeight + 'px; width: 100%; top: 0px; left: 0px; background: #fff; z-index: 566666;">\
+        <div id="ad-capture-header" style="margin-top:50px; margin-left:10px">\
+            Capturing Screenshot of Ads - <span id="ad-capture-num">1</span> of '+totalAds+'.\
+          </div>\
+        <div id="ad-capture-container" style="margin-top:10px; margin-left:10px"></div>\
+      </div>');
 
       // start screenshot of ads
       screenshotNextAd(shared);
@@ -61,8 +67,6 @@
 
   // 1
   function screenshotNextAd(shared) {
-    console.log("Begin Screenshotting Ads- index:"+curAdIndex);
-
     // display the ad to capture
     $("#ad-capture-container").html($(curAds[curAdIndex]).html());
         
@@ -74,10 +78,11 @@
 
     // increment index for next round
     curAdIndex = curAdIndex+1;
+    $("#ad-capture-num").text(curAdIndex);
     shared.lastAdCapture = (curAdIndex >= totalAds);
 
     // screenshot the ad
-    setTimeout(function() { screenshotVisibleArea(shared); }, 1000);
+    setTimeout(function() { screenshotVisibleArea(shared); }, 200);
   }
   
   // 2
@@ -105,10 +110,14 @@
     // generate zip file
     zip.generateAsync({type:"base64"})
     .then(function(content) {
+        // 
+        $("#ad-capture-header").html("Capture Screenshots of Ads - COMPLETE");
         // see FileSaver.js
-        $("#ad-capture-container").append("<a href='data:application/zip;base64,"+content+"'>Download ZipFile</a>")
+        $("#ad-capture-container").html("\
+        <div class='ad-capture-btn'>\
+          <a href='data:application/zip;base64,"+content+"'>Download ZipFile</a>\
+        </div>");
     });
-    
     
     /*
     // ****** Add DOM Elements to Page
